@@ -1,6 +1,10 @@
 from app.enums import PayoutType, SaleStatus
 from app.repositories.payout_repository import PayoutRepository
 from app.repositories.sale_repository import SaleRepository
+from app.core.exceptions import (
+    ResourceNotFoundException,
+    SaleAlreadyReconciledException,
+)
 
 
 class ReconciliationService:
@@ -44,11 +48,15 @@ class ReconciliationService:
         sale = self.sale_repo.get_by_id(sale_id)
 
         if sale is None:
-            raise ValueError("Sale not found.")
+            raise ResourceNotFoundException(
+        "Sale not found."
+    )
 
         # Prevent duplicate reconciliation
         if sale.status != SaleStatus.PENDING:
-            raise ValueError("Sale has already been reconciled.")
+            raise SaleAlreadyReconciledException(
+        "Sale has already been reconciled."
+    )
 
         # Fetch advance payout
         advance = self.payout_repo.get_by_sale_and_type(

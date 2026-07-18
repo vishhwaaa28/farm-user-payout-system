@@ -14,6 +14,10 @@ from app.repositories.payout_repository import PayoutRepository
 from app.repositories.withdrawal_repository import (
     WithdrawalRepository,
 )
+from app.core.exceptions import (
+    ValidationException,
+    InsufficientBalanceException,
+)
 
 
 class WithdrawalService:
@@ -71,18 +75,18 @@ class WithdrawalService:
         """
 
         if amount <= Decimal("0.00"):
-            raise ValueError(
-                "Withdrawal amount must be greater than zero."
-            )
+            raise ValidationException(
+        "Withdrawal amount must be greater than zero."
+    )
 
         available = self.calculate_available_balance(
             user_id
         )
 
         if amount > available:
-            raise ValueError(
-                "Insufficient balance."
-            )
+            raise InsufficientBalanceException(
+        "Insufficient balance."
+    )
 
         # Step 1: Create withdrawal request
         withdrawal = Withdrawal(

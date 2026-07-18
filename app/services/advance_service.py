@@ -1,5 +1,4 @@
 from decimal import Decimal
-
 from app.enums import PayoutStatus, PayoutType
 from app.models.payout import Payout
 from app.models.sale import Sale
