@@ -13,12 +13,34 @@ class PayoutRepository(BaseRepository):
 
     def create(self, payout: Payout) -> Payout:
         """
-        Create a new payout.
+        Persist a payout in the database.
         """
         self.db.add(payout)
         self.db.commit()
         self.db.refresh(payout)
         return payout
+
+    def create_payout(
+        self,
+        sale_id: int,
+        user_id: int,
+        payout_type: PayoutType,
+        amount: Decimal,
+        status: PayoutStatus = PayoutStatus.SUCCESS,
+    ) -> Payout:
+        """
+        Create and persist a payout entry.
+        """
+
+        payout = Payout(
+            sale_id=sale_id,
+            user_id=user_id,
+            type=payout_type,
+            amount=amount,
+            status=status,
+        )
+
+        return self.create(payout)
 
     def advance_exists(self, sale_id: int) -> bool:
         """
@@ -54,7 +76,7 @@ class PayoutRepository(BaseRepository):
 
     def get_by_sale(self, sale_id: int) -> list[Payout]:
         """
-        Fetch all payouts for a sale.
+        Fetch all payouts associated with a sale.
         """
         return (
             self.db.query(Payout)
@@ -79,8 +101,7 @@ class PayoutRepository(BaseRepository):
         user_id: int,
     ) -> Decimal:
         """
-        Calculate the total successful payouts
-        made to a user.
+        Calculate total successful payouts for a user.
         """
         total = (
             self.db.query(func.sum(Payout.amount))
@@ -92,3 +113,29 @@ class PayoutRepository(BaseRepository):
         )
 
         return total or Decimal("0.00")
+
+    def get_total_adjustments(
+        self,
+        user_id: int,
+    ) -> Decimal:
+        """
+        Calculate total adjustment payouts for a user.
+        """
+        total = (
+            self.db.query(func.sum(Payout.amount))
+            .filter(
+                Payout.user_id == user_id,
+                Payout.type == PayoutType.ADJUSTMENT,
+                Payout.status == PayoutStatus.SUCCESS,
+            )
+            .scalar()
+        )
+
+        return total or Decimal("0.00")
+
+    def delete(self, payout: Payout) -> None:
+        """
+        Delete a payout.
+        """
+        self.db.delete(payout)
+        self.db.commit()

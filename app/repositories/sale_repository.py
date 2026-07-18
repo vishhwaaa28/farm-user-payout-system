@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from app.enums import SaleStatus
@@ -47,7 +48,6 @@ class SaleRepository(BaseRepository):
         Update the status of a sale.
         """
         sale.status = status
-        self.db.add(sale)
         self.db.commit()
         self.db.refresh(sale)
         return sale
@@ -62,3 +62,20 @@ class SaleRepository(BaseRepository):
             .order_by(Sale.created_at)
             .all()
         )
+
+    def reconcile(
+        self,
+        sale: Sale,
+        status: SaleStatus,
+    ) -> Sale:
+        """
+        Reconcile a sale by updating its status and
+        recording the reconciliation timestamp.
+        """
+        sale.status = status
+        sale.reconciled_at = datetime.utcnow()
+
+        self.db.commit()
+        self.db.refresh(sale)
+
+        return sale
