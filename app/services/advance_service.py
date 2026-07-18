@@ -1,10 +1,11 @@
 from decimal import Decimal
+
+from app.core.constants import ADVANCE_PERCENTAGE
 from app.enums import PayoutStatus, PayoutType
 from app.models.payout import Payout
 from app.models.sale import Sale
 from app.repositories.payout_repository import PayoutRepository
 from app.repositories.sale_repository import SaleRepository
-from app.core.constants import ADVANCE_PERCENTAGE
 
 
 class AdvancePayoutService:
@@ -13,8 +14,9 @@ class AdvancePayoutService:
 
     Business Rules:
     - Every pending sale receives an advance payout of 10%.
-    - Advance payout is created only once.
-    - Service is idempotent.
+    - Only one advance payout can exist per sale.
+    - Duplicate requests are treated as idempotent and do not create
+      additional payouts.
     """
 
     ADVANCE_PERCENTAGE = ADVANCE_PERCENTAGE
@@ -32,7 +34,9 @@ class AdvancePayoutService:
         earning: Decimal,
     ) -> Decimal:
         """
-        Calculate 10% advance amount.
+        Calculate the advance payout amount.
+
+        The advance payout is 10% of the sale earning.
         """
 
         return (
@@ -44,13 +48,19 @@ class AdvancePayoutService:
         sale: Sale,
     ) -> Payout | None:
         """
-        Process advance payout for a single sale.
+        Process the advance payout for a single sale.
 
         Returns:
-            Payout if created.
-            None if already processed.
+            Payout:
+                If a new advance payout is successfully created.
+
+            None:
+                If an advance payout already exists for the sale.
+                This makes the operation idempotent and prevents
+                duplicate payouts.
         """
 
+        # Prevent duplicate advance payouts
         if self.payout_repo.advance_exists(sale.id):
             return None
 
@@ -74,8 +84,8 @@ class AdvancePayoutService:
 
         Returns:
         {
-            "processed": x,
-            "skipped": y
+            "processed": <number of payouts created>,
+            "skipped": <number of sales already processed>
         }
         """
 
@@ -85,10 +95,9 @@ class AdvancePayoutService:
         pending_sales = self.sale_repo.get_pending_sales()
 
         for sale in pending_sales:
-
             payout = self.process_sale(sale)
 
-            if payout:
+            if payout is not None:
                 processed += 1
             else:
                 skipped += 1

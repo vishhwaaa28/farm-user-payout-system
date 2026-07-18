@@ -5,6 +5,20 @@ A backend service built using **FastAPI**, **SQLAlchemy**, and **SQLite** to man
 > **GitHub Repository:**  
 > https://github.com/vishhwaaa28/faym-user-payout-system
 
+## 📚 Documentation
+
+Detailed project documentation is available in the `docs/` directory.
+
+| Document | Description |
+|----------|-------------|
+| [01_LLD.md](docs/01_LLD.md) | Low-Level Design |
+| [02_DATABASE_SCHEMA.md](docs/02_DATABASE_SCHEMA.md) | Database Schema & Relationships |
+| [03_DESIGN_DECISIONS.md](docs/03_DESIGN_DECISIONS.md) | Design Decisions & Trade-offs |
+| [04_EDGE_CASES.md](docs/04_EDGE_CASES.md) | Edge Cases & Failure Scenarios |
+| [05_API_DESIGN.md](docs/05_API_DESIGN.md) | REST API Documentation |
+| [06_CLASS_DESIGN.md](docs/06_CLASS_DESIGN.md) | Class Design |
+| [07_ARCHITECTURE_DECISIONS.md](docs/07_ARCHITECTURE_DECISIONS.md) | Architecture Decision Records |
+
 ---
 
 ## Table of Contents

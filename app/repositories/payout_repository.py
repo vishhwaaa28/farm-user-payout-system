@@ -2,7 +2,6 @@ from decimal import Decimal
 from typing import Optional
 
 from sqlalchemy import func
-
 from app.enums import PayoutStatus, PayoutType
 from app.models.payout import Payout
 from app.repositories.base_repository import BaseRepository
